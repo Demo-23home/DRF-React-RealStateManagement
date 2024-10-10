@@ -1,6 +1,6 @@
 from pathlib import Path
 from os import getenv, path
-from .env import load_dotenv
+from dotenv import load_dotenv
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -17,30 +17,28 @@ if path.isfile(local_env_file):
 # Application definition
 
 DJANGO_APPS = [
-    'django.contrib.admin',
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.messages',
-    'django.contrib.staticfiles',
-    "django.contrib.sites"
+    "django.contrib.admin",
+    "django.contrib.auth",
+    "django.contrib.contenttypes",
+    "django.contrib.sessions",
+    "django.contrib.messages",
+    "django.contrib.staticfiles",
+    "django.contrib.sites",
 ]
-
 
 THIRD_PARTY_APPS = [
     "rest_framework",
     "django_countries",
     "phonenumber_field",
-    'drf_yasg',
+    "drf_yasg",
     "djoser",
     "social_django",
     "taggit",
     "django_filters",
     "djcelery_email",
     "cloudinary",
-    "django_celery_beat"
+    "django_celery_beat",
 ]
-
 
 LOCAL_APPS = []
 

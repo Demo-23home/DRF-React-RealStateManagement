@@ -1,5 +1,5 @@
 from os import getenv, path
-from .env import load_dotenv
+from dotenv import load_dotenv
 
 
 from .base import *  # noqa
