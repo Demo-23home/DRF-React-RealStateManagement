@@ -52,8 +52,9 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
 # Copy wheels from the build stage
 COPY --from=python-build-stage /usr/src/app/wheels /wheels/
 
-# Install Python packages from wheels
-RUN pip install --no-cache-dir --no-index --find-links=/wheels/ /wheels/* \
+# **Install setuptools before other dependencies**
+RUN pip install --no-cache-dir setuptools && \
+    pip install --no-cache-dir --no-index --find-links=/wheels/ /wheels/* \
     && rm -rf /wheels/
 
 # Copy and prepare entrypoint and start scripts
