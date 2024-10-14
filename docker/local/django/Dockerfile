@@ -1,66 +1,74 @@
-FROM docker.io/python:3.12-slim-bookworm as python
+# Base Python Image
+FROM docker.io/python:3.12-slim-bookworm AS python
 
-
-# Satge 1: Building Depnedancy Wheels
+# Stage 1: Building Dependency Wheels
 FROM python AS python-build-stage
 
 ARG BUILD_ENVIRONMENT=local 
 
+# Install build dependencies
 RUN apt-get update && apt-get install --no-install-recommends -y \
     build-essential \
-    libpq-dev
+    libpq-dev \
+    && rm -rf /var/lib/apt/lists/*
 
+# Upgrade pip to the latest version
+RUN pip install --upgrade pip
+
+# Copy requirements files
 COPY ./requirements .
 
-RUN pip install --wheel-dir /usr/src/app/wheels \
-    -r ${BUILD_ENVIRONMENT}.txt
-
-
+# Create wheels directory and build wheels
+RUN mkdir -p /usr/src/app/wheels && \
+    pip wheel --wheel-dir /usr/src/app/wheels -r ${BUILD_ENVIRONMENT}.txt
 
 # Stage 2: Python Run
-FROM python as python-run-stage
+FROM python AS python-run-stage
 
 ARG BUILD_ENVIRONMENT=local
 ARG APP_HOME=/app/
-ENV PYTHONDONTWRITEBYTECODE 1
-ENV PYTHONUNBUFFERED 1
-ENV BUILD_ENV ${BUILD_ENVIRONMENT}
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+ENV BUILD_ENV=${BUILD_ENVIRONMENT}
 WORKDIR ${APP_HOME}
 
-RUN apt-get upadate && apt-get install --no-recommends -y \
-    sudo git bash-completion nano ssh
-
-RUN addgroup --system django && \
-    adduser --system --ingroup django django && \
-    mkdir -p ${APP_HOME}/staticfiles && \
-    chown django:django ${APP_HOME}/staticfiles && \
-    chmod 775 ${APP_HOME}/staticfiles
-
-    
-RUN apt-get update && apt-get install --no-install-recommends -y && \
+# Install runtime dependencies and setup user
+RUN apt-get update && apt-get install --no-install-recommends -y \
+    sudo \
+    git \
+    bash-completion \
+    nano \
+    ssh \
     libpq-dev \
     gettext \
-    && apt-get purge -y  --auto-remove -o APT:AutoRemove::RecommendsImportant=false \
+    && addgroup --system django \
+    && adduser --system --ingroup django django \
+    && mkdir -p ${APP_HOME}/staticfiles \
+    && chown django:django ${APP_HOME}/staticfiles \
+    && chmod 775 ${APP_HOME}/staticfiles \
+    && apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false \
     && rm -rf /var/lib/apt/lists/*
 
-
+# Copy wheels from the build stage
 COPY --from=python-build-stage /usr/src/app/wheels /wheels/
 
+# Install Python packages from wheels
 RUN pip install --no-cache-dir --no-index --find-links=/wheels/ /wheels/* \
     && rm -rf /wheels/
 
+# Copy and prepare entrypoint and start scripts
 COPY --chown=django:django ./docker/local/django/entrypoint.sh /entrypoint
-RUN sed -i "s/\r//g" /entrypoint
-RUN chmod +x /entrypoint
-
+RUN sed -i "s/\r//g" /entrypoint && chmod +x /entrypoint
 
 COPY --chown=django:django ./docker/local/django/start.sh /start
-RUN sed -i "s/\r//g" /start
-RUN chmod +x /start
+RUN sed -i "s/\r//g" /start && chmod +x /start
 
+# Copy application code
 COPY --chown=django:django . ${APP_HOME}
 RUN chown django:django ${APP_HOME}
 
+# Switch to non-root user
 USER django
 
+# Set entrypoint
 ENTRYPOINT [ "/entrypoint" ]
