@@ -9,10 +9,11 @@ services:
     container_name: estate_prod_api
     volumes:
       - .:/app:z
-      - estate_prod_staticfiles:/app/staticfiles  # Changed to named volume
+      - ./staticfiles:/app/staticfiles:z # Added :z for SELinux compatibility
 
-    ports:
-      - "8000:8000"
+    expose:
+      - "8000"
+
     env_file:
       - ./.envs/.env.local
     depends_on:
@@ -40,7 +41,7 @@ services:
   mailpit:
     image: docker.io/axllent/mailpit:v1.15
     container_name: estate_prod_mailpit
-    command: ["--smtp-auth-allow-insecure"]  # Added command flag
+    command: ["--smtp-auth-allow-insecure"]
 
     ports:
       - "8025:8025" # UI Port
@@ -56,19 +57,36 @@ services:
       - estate_prod_nw
 
   client:
-    build: 
+    build:
       context: ./client
       dockerfile: ./docker/local/Dockerfile
-    container_name : estate_client
+    container_name: estate_client
     image: estate_client
-    ports: 
-      - "3000:3000"
+
+    expose:
+      - "3000"
+
     volumes:
       - ./client:/app:delegated
       - /app/node_modules
-    networks: 
-    -  estate_prod_nw
+    networks:
+      - estate_prod_nw
 
+  nginx:
+    build:
+      context: ./docker/local/nginx
+      dockerfile: Dockerfile
+    restart: always
+    container_name: estate_nginx
+    ports:
+      - "8080:80"
+    volumes:
+      - ./staticfiles:/app/staticfiles:z # Added :z for SELinux compatibility
+      - logs_store:/var/log/nginx
+    depends_on:
+      - api
+    networks:
+      - estate_prod_nw
 
 networks:
   estate_prod_nw:
@@ -77,5 +95,4 @@ networks:
 volumes:
   estate_prod_postgres_data: {}
   estate_prod_mailpit_data: {}
-  estate_prod_staticfiles: {}
-
+  logs_store: {}

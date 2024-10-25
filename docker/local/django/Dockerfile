@@ -41,10 +41,10 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
     ssh \
     libpq-dev \
     gettext \
-    && addgroup --system django \
-    && adduser --system --ingroup django django \
+    # && addgroup --system django \
+    # && adduser --system --ingroup django django \
     && mkdir -p ${APP_HOME}/staticfiles \
-    && chown django:django ${APP_HOME}/staticfiles \
+    # && chown django:django ${APP_HOME}/staticfiles \
     && chmod 775 ${APP_HOME}/staticfiles \
     && apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false \
     && rm -rf /var/lib/apt/lists/*
@@ -58,18 +58,18 @@ RUN pip install --no-cache-dir setuptools && \
     && rm -rf /wheels/
 
 # Copy and prepare entrypoint and start scripts
-COPY --chown=django:django ./docker/local/django/entrypoint.sh /entrypoint
+COPY  ./docker/local/django/entrypoint.sh /entrypoint
 RUN sed -i "s/\r//g" /entrypoint && chmod +x /entrypoint
 
-COPY --chown=django:django ./docker/local/django/start.sh /start
+COPY  ./docker/local/django/start.sh /start
 RUN sed -i "s/\r//g" /start && chmod +x /start
 
 # Copy application code
-COPY --chown=django:django . ${APP_HOME}
-RUN chown django:django ${APP_HOME}
+COPY  . ${APP_HOME}
+# RUN chown django:django ${APP_HOME}
 
 # Switch to non-root user
-USER django
+# USER django
 
 # Set entrypoint
 ENTRYPOINT [ "/entrypoint" ]

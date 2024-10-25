@@ -28,18 +28,18 @@ COPY . ${APP_HOME}
 # unitl the CMD, this will prevent the permissions error will araise when initializing the client cache 
 # else if you are in the up stage uncomment thses lines if commented
 
-# Create a new user nextjs belongs to the new group nodejs
-RUN addgroup -g 1001 -S nodejs && \
-adduser -S nextjs -u 1001 -G nodejs
+# # Create a new user nextjs belongs to the new group nodejs
+# RUN addgroup -g 1001 -S nodejs && \
+# adduser -S nextjs -u 1001 -G nodejs
 
-# change the ownership of the working dir in the container to the new user nextjs
-RUN chown -R nextjs:nodejs ${APP_HOME}
+# # change the ownership of the working dir in the container to the new user nextjs
+# RUN chown -R nextjs:nodejs ${APP_HOME}
 
-# Add after copying the project files
-RUN mkdir -p /app/.next/cache && chown -R nextjs:nodejs /app/.next
+# # Add after copying the project files
+# RUN mkdir -p /app/.next/cache && chown -R nextjs:nodejs /app/.next
 
-# Swich to nextjs user
-USER nextjs 
+# # Swich to nextjs user
+# USER nextjs 
 
 # Runing the development server 
 CMD [ "npm", "run", "dev" ]
