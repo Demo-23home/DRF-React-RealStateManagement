@@ -64,6 +64,16 @@ RUN sed -i "s/\r//g" /entrypoint && chmod +x /entrypoint
 COPY  ./docker/local/django/start.sh /start
 RUN sed -i "s/\r//g" /start && chmod +x /start
 
+COPY  ./docker/local/django/celery/worker/start.sh /start-celeryworker
+RUN sed -i "s/\r//g" /start-celeryworker && chmod +x /start-celeryworker
+
+COPY  ./docker/local/django/celery/beat/start.sh /start-celerybeat
+RUN sed -i "s/\r//g" /start-celerybeat && chmod +x /start-celerybeat
+
+
+COPY  ./docker/local/django/celery/flower/start.sh /start-flower
+RUN sed -i "s/\r//g" /start-celeryflower && chmod +x /start-flower
+
 # Copy application code
 COPY  . ${APP_HOME}
 # RUN chown django:django ${APP_HOME}
