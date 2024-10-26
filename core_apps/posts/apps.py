@@ -3,6 +3,6 @@ from django.utils.translation import gettext_lazy as _
 
 
 class PostsConfig(AppConfig):
-    default_auto_field = 'django.db.models.BigAutoField'
-    name = 'core_apps.posts'
-    verbose_name = _('Posts')
+    default_auto_field = "django.db.models.BigAutoField"
+    name = "core_apps.posts"
+    verbose_name = _("Posts")

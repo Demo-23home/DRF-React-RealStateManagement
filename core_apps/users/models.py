@@ -7,10 +7,11 @@ from core_apps.users.managers import UserManager
 
 
 class UsernameValidator(validators.RegexValidator):
-    regex = r'^[\w.@+-]+\Z'
-    message = _("Your username is not valid. A username should only contain letters , numbers, a dot "
-                "@ Symbol, + symbol and a dash"
-                )
+    regex = r"^[\w.@+-]+\Z"
+    message = _(
+        "Your username is not valid. A username should only contain letters , numbers, a dot "
+        "@ Symbol, + symbol and a dash"
+    )
     flags = 0
 
 
@@ -19,15 +20,20 @@ class User(AbstractUser):
     id = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
     first_name = models.CharField(verbose_name=_("First Name"), max_length=50)
     last_name = models.CharField(verbose_name=_("Last Name"), max_length=50)
-    email = models.EmailField(verbose_name=_(
-        "Email"), max_length=254, unique=True, db_index=True)
-    username = models.CharField(verbose_name=_(
-        "Username"), max_length=50, unique=True, validators=[UsernameValidator])
+    email = models.EmailField(
+        verbose_name=_("Email"), max_length=254, unique=True, db_index=True
+    )
+    username = models.CharField(
+        verbose_name=_("Username"),
+        max_length=50,
+        unique=True,
+        validators=[UsernameValidator],
+    )
 
     EMAIL_FIELD = "email"
     USERNAME_FIELD = "email"
 
-    REQUIRED_FIELDS = ["username", "first_name",  "last_name"]
+    REQUIRED_FIELDS = ["username", "first_name", "last_name"]
 
     manager = UserManager()
 

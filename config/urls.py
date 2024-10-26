@@ -12,16 +12,15 @@ schema_view = get_schema_view(
         default_version=1,
         description="An API App for Managing Apartments",
         contact=openapi.Contact(email="zeyadslama23@gmail.com"),
-        license=openapi.License(name="MIT License")
+        license=openapi.License(name="MIT License"),
     ),
     public=True,
-    permission_classes=[permissions.AllowAny]
+    permission_classes=[permissions.AllowAny],
 )
 
 
 urlpatterns = [
-    path("redoc/", schema_view.with_ui("redoc",
-         cache_timeout=0), name="schema-redoc"),
+    path("redoc/", schema_view.with_ui("redoc", cache_timeout=0), name="schema-redoc"),
     path(settings.ADMIN_URL, admin.site.urls),
 ]
 

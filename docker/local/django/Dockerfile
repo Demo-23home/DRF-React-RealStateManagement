@@ -72,7 +72,8 @@ RUN sed -i "s/\r//g" /start-celerybeat && chmod +x /start-celerybeat
 
 
 COPY  ./docker/local/django/celery/flower/start.sh /start-flower
-RUN sed -i "s/\r//g" /start-celeryflower && chmod +x /start-flower
+RUN sed -i 's/\r$//g' /start-flower
+RUN chmod +x /start-flower
 
 # Copy application code
 COPY  . ${APP_HOME}

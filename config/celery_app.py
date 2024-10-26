@@ -1,9 +1,9 @@
-import os 
-from django.conf import settings 
+import os
+from django.conf import settings
 from celery import Celery
 
 
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "conf.settings.local")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings.local")
 
 app = Celery("alpha_apartments")
 
