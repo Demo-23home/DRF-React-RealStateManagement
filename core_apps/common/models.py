@@ -5,7 +5,6 @@ from django.contrib.contenttypes.models import ContentType
 from django.contrib.auth import get_user_model
 from django.utils.translation import gettext_lazy as _
 
-
 User = get_user_model()
 
 
@@ -29,7 +28,7 @@ class ContentView(TimeStampedModel):
     content_object = GenericForeignKey("content_type", "object_id")
 
     user = models.ForeignKey(
-        "User",
+        User,
         verbose_name=_("User"),
         on_delete=models.SET_NULL,
         related_name="content_views",

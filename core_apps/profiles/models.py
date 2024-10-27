@@ -5,6 +5,7 @@ from django.utils.translation import gettext_lazy as _
 from django_countries.fields import CountryField
 from phonenumber_field.modelfields import PhoneNumberField
 from core_apps.common.models import TimeStampedModel
+from cloudinary.models import CloudinaryField
 
 
 User = get_user_model()
@@ -32,16 +33,17 @@ class Profile(TimeStampedModel):
         HAVC = ("hvac", _("HVAC"))
         TENNAT = ("tennat", _("Tennat"))
 
-    user = models.OneToOneField("User", on_delete=models.CASCADE, related_name="profile")
-    avatar = models.CharField(verbose_name=_("Avatar"), blank=True, null=True)
-    gender = models.CharField(verbose_name=_("Gender"), choices=Gender.choices)
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="profile")
+    avatar = CloudinaryField('image')
+    gender = models.CharField(verbose_name=_(
+        "Gender"), choices=Gender.choices, default=Gender.MALE)
     bio = models.TextField(verbose_name=_("BIO"), blank=True, null=True)
-    occupation = models.TextField(verbose_name=_("Occupation"), choices=Occupation.choices)
-    phone_number = models.PhoneNumberField(verbose_name=_("Phone Number"), default="+201017595972", max_length=13)
+    occupation = models.TextField(verbose_name=_("Occupation"), choices=Occupation.choices, default=Occupation.Roofer)
+    phone_number = PhoneNumberField(verbose_name=_("Phone Number"), default="+201017595972", max_length=13)
     country_field = CountryField(verbose_name=_("Country Field"), default="EGY")
     city_of_origin = models.CharField(verbose_name=_("City"), max_length=150, default="Cairo")
-    report_count = models.IntegerField(verbose_name=_("Reputation"), default=100)
-    reputation = models.IntegerField(verbose_name=_("Reputation"))
+    report_count = models.IntegerField(verbose_name=_("Report Count"), default=0)
+    reputation = models.IntegerField(verbose_name=_("Reputation"), default=100)
     slug = AutoSlugField(populate_from=get_user_username, unique=True)
     
     

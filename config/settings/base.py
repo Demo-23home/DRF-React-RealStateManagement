@@ -141,6 +141,11 @@ SITE_ID = 1
 STATIC_URL = "/static/"
 STATIC_ROOT = str(BASE_DIR / "staticfiles")
 
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
+
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
@@ -170,14 +175,13 @@ CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"
 CELERY_WORKER_SEND_TASK_EVENTS = True
 
 
-# Cloudnary Settings
-CLOUDNARY_CLOUD_NAME = getenv("CLOUDNARY_CLOUD_NAME")
-CLOUDNARY_API_KEY = getenv("CLOUDNARY_API_KEY")
-CLOUDNARY_API_SECRET = getenv("CLOUDNARY_API_SECRET")
-
+# Cloudinary Settings
+CLOUDINARY_CLOUD_NAME = getenv("CLOUDINARY_CLOUD_NAME")
+CLOUDINARY_API_KEY = getenv("CLOUDINARY_API_KEY")
+CLOUDINARY_API_SECRET = getenv("CLOUDINARY_API_SECRET")
 
 cloudinary.config(
-    cloud_name=CLOUDNARY_CLOUD_NAME,
-    api_key=CLOUDNARY_API_KEY, 
-    api_secret=CLOUDNARY_API_SECRET,
+    cloud_name=CLOUDINARY_CLOUD_NAME,
+    api_key=CLOUDINARY_API_KEY,
+    api_secret=CLOUDINARY_API_SECRET,
 )

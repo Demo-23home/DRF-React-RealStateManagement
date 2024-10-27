@@ -4,6 +4,7 @@ from django.conf import settings
 from drf_yasg import openapi
 from drf_yasg.views import get_schema_view
 from rest_framework import permissions
+from django.conf.urls.static import static
 
 
 schema_view = get_schema_view(
@@ -30,3 +31,8 @@ admin.site.site_header = "Alpha Apartments Admin"  # Sets the header in the admi
 admin.site.site_title = "Alpha Apartments Admin Portal"
 # Sets the index page title
 admin.site.index_title = "Welcome to the Alpha Apartments Admin Portal"
+
+
+# Serve static and media files during development
+urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
