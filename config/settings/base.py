@@ -1,7 +1,7 @@
 from pathlib import Path
 from os import getenv, path
 from dotenv import load_dotenv
-
+import cloudinary
 
 BASE_DIR = Path(__file__).resolve(strict=True).parent.parent.parent
 
@@ -151,7 +151,6 @@ AUTH_USER_MODEL = "users.User"
 
 
 # Celery Settings:
-
 if USE_TZ:
     CELERY_TIMEZONE = TIME_ZONE
 
@@ -169,3 +168,16 @@ CELERY_TASK_TIME_LIMIT = 5 * 60
 CELERY_TASK_SOFT_TIME_LIMIT = 60
 CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"
 CELERY_WORKER_SEND_TASK_EVENTS = True
+
+
+# Cloudnary Settings
+CLOUDNARY_CLOUD_NAME = getenv("CLOUDNARY_CLOUD_NAME")
+CLOUDNARY_API_KEY = getenv("CLOUDNARY_API_KEY")
+CLOUDNARY_API_SECRET = getenv("CLOUDNARY_API_SECRET")
+
+
+cloudinary.config(
+    cloud_name=CLOUDNARY_CLOUD_NAME,
+    api_key=CLOUDNARY_API_KEY, 
+    api_secret=CLOUDNARY_API_SECRET,
+)
