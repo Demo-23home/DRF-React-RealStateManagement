@@ -185,3 +185,16 @@ cloudinary.config(
     api_key=CLOUDINARY_API_KEY,
     api_secret=CLOUDINARY_API_SECRET,
 )
+
+
+# Cookies Settings
+COOKIE_NAME = "access"
+
+# cookie will sent with the same site request and with cross side top-level navigation
+# this will provide balance between security and usability
+# this helps against CSRF Attacks by not sending cookies with potentially dangerous requests
+# while allowing the cookies to be sent with top-level navigation that is initiated by user actions
+COOKIE_SAME_SITE = "Lax"
+COOKIE_PATH = "/"  # cookies will be accessed project wide
+COOKIE_HTTP_ONLY = True  # can't be accessed via js
+COOKIE_SECURE = getenv("COOKIE_SECURE", "True") == True # HTTPS only or HTTP && HTTPS
