@@ -43,3 +43,5 @@ mailpit-volume:
 estate-db:
 	sudo docker-compose -f local.yml exec postgres psql --username=demo --dbname=estate
 
+generate_token:
+	python -c "import secrets;  print(secrets.token_urlsafe(38))"
