@@ -151,10 +151,10 @@ MEDIA_ROOT = BASE_DIR / 'media'
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
 TAGGIT_CASE_INSENSITIVE = True
 
 AUTH_USER_MODEL = "users.User"
-
 
 # Celery Settings:
 if USE_TZ:
@@ -165,14 +165,19 @@ CELERY_RESULT_BACKEND = getenv("CELERY_RESULT_BACKEND")
 CELERY_ACCEPT_CONTENT = ["application/json"]
 CELERY_TASK_SERIALIZER = "json"
 CELERY_RESULT_SERIALIZER = "json"
-CELERY_RESULT_BACKEND_MAX_TRIES = 10
+CELERY_RESULT_BACKEND_MAX_RETRIES = 10
 
 CELERY_TASK_SEND_SENT_EVENT = True
 CELERY_RESULT_EXTENDED = True
+
 CELERY_RESULT_BACKEND_ALWAYS_RETRY = True
+
 CELERY_TASK_TIME_LIMIT = 5 * 60
+
 CELERY_TASK_SOFT_TIME_LIMIT = 60
+
 CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"
+
 CELERY_WORKER_SEND_TASK_EVENTS = True
 
 
@@ -187,83 +192,69 @@ cloudinary.config(
     api_secret=CLOUDINARY_API_SECRET,
 )
 
-
 # Cookies Settings
 COOKIE_NAME = "access"
-
 # cookie will sent with the same site request and with cross side top-level navigation
 # this will provide balance between security and usability
 # this helps against CSRF Attacks by not sending cookies with potentially dangerous requests
 # while allowing the cookies to be sent with top-level navigation that is initiated by user actions
-COOKIE_SAME_SITE = "Lax"
+COOKIE_SAMESITE = "Lax"
 COOKIE_PATH = "/"  # cookies will be accessed project wide
-COOKIE_HTTP_ONLY = True  # can't be accessed via js
+COOKIE_HTTPONLY = True  # can't be accessed via js
 # HTTPS only or HTTP && HTTPS
-COOKIE_SECURE = getenv("COOKIE_SECURE", "True") == True
+COOKIE_SECURE = getenv("COOKIE_SECURE", "True") == "True"
 
 # Authentication Settings
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
         "core_apps.common.cookie_auth.CookieAuthentication",
     ),
-
-    "DEFAULT_PERMISSION_CLASSES": (
-        "rest_framework.permissions.IsAuthenticated",
-    ),
-
-    "DEFAULT_PAGINATION_CLASS": (
-        "rest_framework.pagination.PageNumberPagination",
-    ),
-
-    "DEFAULT_FILTER_BACKENDS": ["django_filters.rest_framework.DjangoFilterBackend",],
-
+    "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.IsAuthenticated",),
+    "DEFAULT_PAGINATION_CLASS": ("rest_framework.pagination.PageNumberPagination",),
+    "DEFAULT_FILTER_BACKENDS": [
+        "django_filters.rest_framework.DjangoFilterBackend",
+    ],
     "PAGE_SIZE": 10,
-
     "DEFAULT_THROTTLE_CLASSES": (
         "rest_framework.throttling.AnonRateThrottle",
         "rest_framework.throttling.UserRateThrottle",
     ),
-
     "DEFAULT_THROTTLE_RATES": {
         "anon": "200/day",
-        "user": "500/day"
-    }
+        "user": "500/day",
+    },
 }
-
 
 SIMPLE_JWT = {
     "SIGNING_KEY": getenv("SIGNING_KEY"),
-    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=120),
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=30),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
     "ROTATE_REFRESH_TOKENS": True,
     "USER_ID_FIELD": "id",
-    "USER_ID_CLAIM": 'user_id'
+    "USER_ID_CLAIM": "user_id",
 }
-
 
 DJOSER = {
     "USER_ID_FIELD": "id",
     "LOGIN_FIELD": "email",
     "TOKEN_MODEL": None,
-    "SET_PASSWORD_RETYPE": True,
+    "USER_CREATE_PASSWORD_RETYPE": True,
     "SEND_ACTIVATION_EMAIL": True,
     "PASSWORD_CHANGED_EMAIL_CONFIRMATION": True,
     "PASSWORD_RESET_CONFIRM_RETYPE": True,
     "ACTIVATION_URL": "activate/{uid}/{token}",
-    "USERNAME_RESET_CONFIRM_URL": "password-reset/{uid}/{token}",
+    "PASSWORD_RESET_CONFIRM_URL": "password-reset/{uid}/{token}",
     "SOCIAL_AUTH_ALLOWED_REDIRECT_URIS": getenv("REDIRECT_URIS", "").split(","),
     "SERIALIZERS": {
-        "user_create": "core_apps.users.serializers.CreateUserSerializer"
-    }
+        "user_create": "core_apps.users.serializers.CreateUserSerializer",
+    },
 }
-
 
 SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = getenv("GOOGLE_CLIENT_ID")
 SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = getenv("GOOGLE_CLIENT_SECRET")
 SOCIAL_AUTH_GOOGLE_OAUTH2_SCOPE = [
     "https://www.googleapis.com/auth/userinfo.email",
     "https://www.googleapis.com/auth/userinfo.profile",
-    "openid"
+    "openid",
 ]
-
 SOCIAL_AUTH_GOOGLE_OAUTH2_EXTRA_DATA = ["first_name", "last_name"]
