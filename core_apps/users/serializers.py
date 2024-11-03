@@ -31,7 +31,7 @@ class CustomUserSerializer(UserSerializer):
 
         read_only_fields = ["id", "email", "date_joined"]
 
-    def get_avatar(self, obj):
+    def get_avatar(self, obj) -> None:
         if obj.profile.avatar: 
             return obj.profile.avatar.url
         return None
