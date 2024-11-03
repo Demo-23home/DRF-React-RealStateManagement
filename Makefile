@@ -45,3 +45,8 @@ estate-db:
 
 generate_token:
 	python -c "import secrets;  print(secrets.token_urlsafe(38))"
+
+
+
+backend_shell:
+	sudo docker-compose -f local.yml exec api sh

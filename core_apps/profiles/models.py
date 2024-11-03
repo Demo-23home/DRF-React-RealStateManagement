@@ -40,7 +40,7 @@ class Profile(TimeStampedModel):
     bio = models.TextField(verbose_name=_("BIO"), blank=True, null=True)
     occupation = models.TextField(verbose_name=_("Occupation"), choices=Occupation.choices, default=Occupation.Roofer)
     phone_number = PhoneNumberField(verbose_name=_("Phone Number"), default="+201017595972", max_length=13)
-    country_field = CountryField(verbose_name=_("Country Field"), default="EGY")
+    country = CountryField(verbose_name=_("Country Field"), default="EGY")
     city_of_origin = models.CharField(verbose_name=_("City"), max_length=150, default="Cairo")
     report_count = models.IntegerField(verbose_name=_("Report Count"), default=0)
     reputation = models.IntegerField(verbose_name=_("Reputation"), default=100)
