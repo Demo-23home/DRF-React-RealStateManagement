@@ -143,8 +143,8 @@ STATIC_URL = "/static/"
 STATIC_ROOT = str(BASE_DIR / "staticfiles")
 
 
-MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
+MEDIA_URL = "/media/"
+MEDIA_ROOT = BASE_DIR / "media"
 
 
 # Default primary key field type
@@ -180,6 +180,8 @@ CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"
 
 CELERY_WORKER_SEND_TASK_EVENTS = True
 
+CELERY_BEAT_SCHEDUEL = {"update-reputations-every-day": {"task": "update_all_reputations"}}
+
 
 # Cloudinary Settings
 CLOUDINARY_CLOUD_NAME = getenv("CLOUDINARY_CLOUD_NAME")
@@ -206,9 +208,7 @@ COOKIE_SECURE = getenv("COOKIE_SECURE", "True") == "True"
 
 # Authentication Settings
 REST_FRAMEWORK = {
-    "DEFAULT_AUTHENTICATION_CLASSES": (
-        "core_apps.common.cookie_auth.CookieAuthentication",
-    ),
+    "DEFAULT_AUTHENTICATION_CLASSES": ("core_apps.common.cookie_auth.CookieAuthentication",),
     "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.IsAuthenticated",),
     "DEFAULT_PAGINATION_CLASS": ("rest_framework.pagination.PageNumberPagination",),
     "DEFAULT_FILTER_BACKENDS": [
