@@ -34,26 +34,28 @@ class Profile(TimeStampedModel):
         TENNAT = ("tennat", _("Tennat"))
 
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="profile")
-    avatar = CloudinaryField('image')
-    gender = models.CharField(verbose_name=_(
-        "Gender"), choices=Gender.choices, default=Gender.MALE)
+    avatar = CloudinaryField("image")
+    gender = models.CharField(verbose_name=_("Gender"), choices=Gender.choices, default=Gender.MALE)
     bio = models.TextField(verbose_name=_("BIO"), blank=True, null=True)
-    occupation = models.TextField(verbose_name=_("Occupation"), choices=Occupation.choices, default=Occupation.Roofer)
-    phone_number = PhoneNumberField(verbose_name=_("Phone Number"), default="+201017595972", max_length=13)
+    occupation = models.TextField(
+        verbose_name=_("Occupation"), choices=Occupation.choices, default=Occupation.TENNAT
+    )
+    phone_number = PhoneNumberField(
+        verbose_name=_("Phone Number"), default="+201017595972", max_length=13
+    )
     country = CountryField(verbose_name=_("Country Field"), default="EGY")
     city_of_origin = models.CharField(verbose_name=_("City"), max_length=150, default="Cairo")
     report_count = models.IntegerField(verbose_name=_("Report Count"), default=0)
     reputation = models.IntegerField(verbose_name=_("Reputation"), default=100)
     slug = AutoSlugField(populate_from=get_user_username, unique=True)
-    
-    
+
     @property
-    def is_banned(self) -> bool: 
+    def is_banned(self) -> bool:
         return self.report_count >= 5
-    
-    def update_reputation(self) -> None: 
+
+    def update_reputation(self) -> None:
         self.reputation = max(0, (100 - self.report_count * 20))
-        
-    def save(self, *args, **kwargs) -> None: 
+
+    def save(self, *args, **kwargs) -> None:
         self.update_reputation()
         super().save(*args, **kwargs)

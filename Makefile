@@ -49,4 +49,7 @@ generate_token:
 
 
 backend_shell:
+	sudo docker-compose -f local.yml run --rm api python manage.py shell
+
+python-manage: 
 	sudo docker-compose -f local.yml exec api sh

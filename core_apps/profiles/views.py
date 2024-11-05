@@ -1,3 +1,107 @@
-from django.shortcuts import render
+from typing import List
+from django.db.models import QuerySet
+from django_filters.rest_framework import DjangoFilterBackend
+from django.http import http404
+from django.contrib.auth import get_user_model
+from rest_framework import filters, generics, status
+from rest_framework.pagination import PageNumberPagination
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from core_apps.common.renderers import GenericJsonRenderer
+from .models import Profile
+from .serializers import AvatarUploadSerializer, ProfileSerializer, UpdateProfileSerializer
+from .tasks import upload_avatar_to_cloudinary
 
-# Create your views here.
+User = get_user_model()
+
+
+class StandardResultsSetPagination(PageNumberPagination):
+    page_size = 9
+    page_size_query_param = "page_size"
+    max_page_size = 100
+
+
+class ProfileListAPIView(generics.ListAPIView):
+    serializer_class = ProfileSerializer
+    pagination_class = StandardResultsSetPagination
+    renderer_classes = [GenericJsonRenderer]
+    object_label = "profiles"
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter]
+    search_fields = ["user__first_name", "user__last_name", "user__username"]
+    filterset_fields = ["occupation", "gender", "country_of_origin"]
+
+    def get_queryset(self) -> List[Profile]:
+        return (
+            Profile.objects.exclude(user__is_staff=True)
+            .exclude(user__is_super_user=True)
+            .filter(occupation=Profile.Occupation.TENNAT)
+        )
+
+
+class ProfileDetailAPIView(generics.RetrieveAPIView):
+    serializer_class = ProfileSerializer
+    renderer_classes = GenericJsonRenderer
+    object_label = "profile"
+
+    def get_queryset(self) -> QuerySet:
+        return Profile.objects.select_related("user").all()
+
+    def get_object(self) -> Profile:
+        try:
+            return Profile.objects.get(user=self.request.user)
+        except Profile.DoesNotExist:
+            raise http404("Profile not found !")
+
+
+class ProfileUpdateAPIView(generics.RetrieveUpdateAPIView):
+    serializer_class = UpdateProfileSerializer
+    renderer_classes = GenericJsonRenderer
+    object_label = "profile"
+
+    def get_queryset(self) -> None:
+        return Profile.objects.none()
+
+    def get_object(self) -> Profile:
+        profile, _ = Profile.objects.get_or_create(user=self.request.user)
+        return profile
+
+    def perform_update(self, serializer: UpdateProfileSerializer) -> Profile:
+        user_data = serializer.validated_data.pop("user", {})
+        profile = serializer.save()
+        User.objects.get(id=self.request.user.id).update(**user_data)
+        return profile
+
+
+class UploadAvatar(APIView):
+    def patch(self, request, *args, **kwargs):
+        return self.upload_avatar(self, request, *args, **kwargs)
+
+    def upload_avatar(self, request, *args, **kwargs):
+        profile = request.user.profile
+        serializer = AvatarUploadSerializer(profile, data=request.data)
+        if serializer.is_valid:
+            image = serializer.validated_data["avatar"]
+            image_content = image.read()
+            upload_avatar_to_cloudinary(profile.id, image_content)
+            return Response({"message": "Avatar upload started"}, status=status.HTTP_200_OK)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class NonTenantProfileListAPIView(generics.ListAPIView):
+    serializer_class = ProfileSerializer
+    object_label = "non-tenant-profiles"
+    pagination_class = StandardResultsSetPagination
+    renderer_classes = GenericJsonRenderer
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter]
+    search_fields = ["user__username", "user__first_name", "user__last_name"]
+    filterset_fields = ["occupation", "country_of_origin", "gender"]
+
+    def get_queryset(self) -> List[Profile]:
+        profiles = (
+            Profile.objects.exclude(user__is_staff=True)
+            .exclude(user__is_superuser=True)
+            .exclude(role=Profile.Occupation.TENNAT)
+        )
+        
+        return profiles
