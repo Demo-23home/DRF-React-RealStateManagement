@@ -46,10 +46,8 @@ estate-db:
 generate_token:
 	python -c "import secrets;  print(secrets.token_urlsafe(38))"
 
-
-
-backend_shell:
+django_shell:
 	sudo docker-compose -f local.yml run --rm api python manage.py shell
 
-python-manage: 
+backend_shell: 
 	sudo docker-compose -f local.yml exec api sh
