@@ -1,7 +1,7 @@
 from typing import List
 from django.db.models import QuerySet
 from django_filters.rest_framework import DjangoFilterBackend
-from django.http import http404
+from django.http import Http404
 from django.contrib.auth import get_user_model
 from rest_framework import filters, generics, status
 from rest_framework.pagination import PageNumberPagination
@@ -28,19 +28,19 @@ class ProfileListAPIView(generics.ListAPIView):
     object_label = "profiles"
     filter_backends = [DjangoFilterBackend, filters.SearchFilter]
     search_fields = ["user__first_name", "user__last_name", "user__username"]
-    filterset_fields = ["occupation", "gender", "country_of_origin"]
+    filterset_fields = ["occupation", "gender", "country"]
 
     def get_queryset(self) -> List[Profile]:
         return (
             Profile.objects.exclude(user__is_staff=True)
-            .exclude(user__is_super_user=True)
-            .filter(occupation=Profile.Occupation.TENNAT)
+            .exclude(user__is_superuser=True)
+            .filter(occupation=Profile.Occupation.TENANT)
         )
 
 
 class ProfileDetailAPIView(generics.RetrieveAPIView):
     serializer_class = ProfileSerializer
-    renderer_classes = GenericJsonRenderer
+    renderer_classes = [GenericJsonRenderer]
     object_label = "profile"
 
     def get_queryset(self) -> QuerySet:
@@ -50,12 +50,12 @@ class ProfileDetailAPIView(generics.RetrieveAPIView):
         try:
             return Profile.objects.get(user=self.request.user)
         except Profile.DoesNotExist:
-            raise http404("Profile not found !")
+            raise Http404("Profile not found !")
 
 
 class ProfileUpdateAPIView(generics.RetrieveUpdateAPIView):
     serializer_class = UpdateProfileSerializer
-    renderer_classes = GenericJsonRenderer
+    renderer_classes = [GenericJsonRenderer]
     object_label = "profile"
 
     def get_queryset(self) -> None:
@@ -68,40 +68,42 @@ class ProfileUpdateAPIView(generics.RetrieveUpdateAPIView):
     def perform_update(self, serializer: UpdateProfileSerializer) -> Profile:
         user_data = serializer.validated_data.pop("user", {})
         profile = serializer.save()
-        User.objects.get(id=self.request.user.id).update(**user_data)
+        User.objects.filter(id=self.request.user.id).update(**user_data)
         return profile
 
 
-class UploadAvatar(APIView):
+class AvatarUploadView(APIView):
     def patch(self, request, *args, **kwargs):
-        return self.upload_avatar(self, request, *args, **kwargs)
+        return self.upload_avatar(request, *args, **kwargs)
 
     def upload_avatar(self, request, *args, **kwargs):
         profile = request.user.profile
         serializer = AvatarUploadSerializer(profile, data=request.data)
-        if serializer.is_valid:
+
+        if serializer.is_valid():
             image = serializer.validated_data["avatar"]
+
             image_content = image.read()
-            upload_avatar_to_cloudinary(profile.id, image_content)
-            return Response({"message": "Avatar upload started"}, status=status.HTTP_200_OK)
-        else:
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+            upload_avatar_to_cloudinary.delay(str(profile.id), image_content)
+
+            return Response({"message": "Avatar upload started."}, status=status.HTTP_202_ACCEPTED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class NonTenantProfileListAPIView(generics.ListAPIView):
     serializer_class = ProfileSerializer
     object_label = "non-tenant-profiles"
     pagination_class = StandardResultsSetPagination
-    renderer_classes = GenericJsonRenderer
+    renderer_classes = [GenericJsonRenderer]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter]
     search_fields = ["user__username", "user__first_name", "user__last_name"]
-    filterset_fields = ["occupation", "country_of_origin", "gender"]
+    filterset_fields = ["occupation", "country", "gender"]
 
     def get_queryset(self) -> List[Profile]:
         profiles = (
             Profile.objects.exclude(user__is_staff=True)
-            .exclude(user__is_superuser=True)
-            .exclude(role=Profile.Occupation.TENNAT)
+            .exclude(user__is_superuser=True)  # Fixed extra underscore
+            .exclude(occupation=Profile.Occupation.TENANT)  # Corrected reference
         )
-        
         return profiles

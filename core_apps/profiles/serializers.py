@@ -8,7 +8,7 @@ class ProfileSerializer(serializers.ModelSerializer):
     last_name = serializers.ReadOnlyField(source="user.last_name")
     username = serializers.ReadOnlyField(source="user.username")
     full_name = serializers.ReadOnlyField(source="user.full_name")
-    country_of_origin = CountryField(name_only=True)
+    country = CountryField(name_only=True)
     date_joined = serializers.DateTimeField(source="user.date_joined", read_only=True)
     avatar = serializers.SerializerMethodField()
 
@@ -21,7 +21,7 @@ class ProfileSerializer(serializers.ModelSerializer):
             "last_name",
             "username",
             "full_name",
-            "country_of_origin",
+            "country",
             "city_of_origin",
             "bio",
             "gender",
@@ -42,7 +42,7 @@ class UpdateProfileSerializer(serializers.ModelSerializer):
     first_name = serializers.CharField(source="user.first_name")
     last_name = serializers.CharField(source="user.last_name")
     username = serializers.CharField(source="user.username")
-    country_of_origin = CountryField(name_only=True)
+    country = CountryField(name_only=True)
 
     class Meta:
         model = Profile
@@ -50,14 +50,13 @@ class UpdateProfileSerializer(serializers.ModelSerializer):
             "first_name",
             "last_name",
             "username",
-            "country_of_origin",
+            "country",
             "city_of_origin",
             "bio",
             "gender",
             "occupation",
             "phone_number",
         ]
-        
 
 
 class AvatarUploadSerializer(serializers.ModelSerializer): 

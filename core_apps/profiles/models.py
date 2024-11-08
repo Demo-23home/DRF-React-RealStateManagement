@@ -31,14 +31,14 @@ class Profile(TimeStampedModel):
         Painter = ("painter", _("Painter"))
         Electrician = ("electrician", _("Electrician"))
         HAVC = ("hvac", _("HVAC"))
-        TENNAT = ("tennat", _("Tennat"))
+        TENANT = ("tenant", _("Tenant"))
 
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="profile")
-    avatar = CloudinaryField("image")
+    avatar = CloudinaryField("image", null=True, blank=True)
     gender = models.CharField(verbose_name=_("Gender"), choices=Gender.choices, default=Gender.MALE)
     bio = models.TextField(verbose_name=_("BIO"), blank=True, null=True)
     occupation = models.TextField(
-        verbose_name=_("Occupation"), choices=Occupation.choices, default=Occupation.TENNAT
+        verbose_name=_("Occupation"), choices=Occupation.choices, default=Occupation.TENANT
     )
     phone_number = PhoneNumberField(
         verbose_name=_("Phone Number"), default="+201017595972", max_length=13
