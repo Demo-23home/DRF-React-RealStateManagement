@@ -47,6 +47,7 @@ LOCAL_APPS = [
     "core_apps.ratings",
     "core_apps.posts",
     "core_apps.apartments",
+    "core_apps.reports"
 ]
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 
@@ -211,7 +212,7 @@ COOKIE_SECURE = getenv("COOKIE_SECURE", "True") == "True"
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": ("core_apps.common.cookie_auth.CookieAuthentication",),
     "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.IsAuthenticated",),
-    "DEFAULT_PAGINATION_CLASS": ("rest_framework.pagination.PageNumberPagination",),
+    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
     "DEFAULT_FILTER_BACKENDS": [
         "django_filters.rest_framework.DjangoFilterBackend",
     ],
