@@ -13,7 +13,7 @@ class Apartments(TimeStampedModel):
     building = models.CharField(verbose_name=_("Building"), max_length=50)
     floor = models.PositiveIntegerField(verbose_name=_("Floor"))
     tenant = models.ForeignKey(
-        User, verbose_name=_("Tenant"), on_delete=models.SET_NULL, null=True, blank=True
+        User, verbose_name=_("Tenant"), on_delete=models.SET_NULL, null=True, blank=True, related_name="apartment"
     )
 
     
