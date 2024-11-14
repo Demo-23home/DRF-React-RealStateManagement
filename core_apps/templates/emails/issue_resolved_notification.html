@@ -1,0 +1,24 @@
+{% extends "emails/base.html" %}
+    {% block title %}
+        Issue Resolved 
+    {%endblock title %}
+    {% block content %}
+        <p>Dear {{issue.reported_by.get_full_name}},</p>
+        <p>
+            Your reporeted isuuse titled "<strong>{{issue.title}}</strong>" has been assigned resolved.
+        </p>
+        <p>Description: <strong>{{issue.discription}}</strong>.</p>
+        <p>
+            Resolved by <strong>{{isuuse.assigned_to.get_full_name}} </strong>
+        </p>        
+        <p>
+            Resolved on <strong>{{isuuse.resolved_on}} </strong>
+        </p>
+        <p>Thank you for bringing this to our attention.</p>
+        <p>
+            Regards, <br />
+            The {{site_name}} Team
+        </p>
+    
+    {% endblock content %}
+    
