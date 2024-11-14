@@ -1,4 +1,5 @@
 {
   "python.analysis.typeCheckingMode": "off",
-  "makefile.configureOnOpen": false
+  "makefile.configureOnOpen": false,
+  "cSpell.words": ["e_assigneme"]
 }
