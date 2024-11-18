@@ -71,18 +71,18 @@ class Issue(TimeStampedModel):
             self.notify_assigned_user()
             
             
-        def notify_assigned_user(self) -> None: 
-            try: 
-                subject = "A new issue assigned {self.title}"
-                from_email = DEFAULT_FROM_EMAIL
-                recipient_list = [self.assigned_to.email]
-                context = {"issue": self, "site_name": SITE_NAME}
-                
-                html_email = render_to_string("emails/issue_assignment_notification.html", context)
-                
-                text_email = strip_tags(html_email)
-                email = EmailMultiAlternatives(subject, text_email, from_email, recipient_list)
-                email.attach_alternative(html_email, "text/html")
-                email.send()
-            except Exception as e: 
-                logger.error(f"Failed to send issue assignment email for issue: '{self.title}' due problem: {e}")
+    def notify_assigned_user(self) -> None: 
+        try: 
+            subject = "A new issue assigned {self.title}"
+            from_email = DEFAULT_FROM_EMAIL
+            recipient_list = [self.assigned_to.email]
+            context = {"issue": self, "site_name": SITE_NAME}
+            
+            html_email = render_to_string("emails/issue_assignment_notification.html", context)
+            
+            text_email = strip_tags(html_email)
+            email = EmailMultiAlternatives(subject, text_email, from_email, recipient_list)
+            email.attach_alternative(html_email, "text/html")
+            email.send()
+        except Exception as e: 
+            logger.error(f"Failed to send issue assignment email for issue: '{self.title}' due problem: {e}")
