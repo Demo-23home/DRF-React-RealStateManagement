@@ -21,8 +21,8 @@ services:
       - mailpit
       - redis
     command: /start
-    networks:
-      - estate_prod_nw
+    # networks:
+    #   - estate_prod_nw
 
   postgres:
     build:
@@ -36,8 +36,8 @@ services:
       - estate_prod_postgres_data:/var/lib/postgresql/data
     env_file:
       - ./.envs/.env.local
-    networks:
-      - estate_prod_nw
+    # networks:
+    #   - estate_prod_nw
 
   mailpit:
     image: docker.io/axllent/mailpit:v1.15
@@ -54,8 +54,8 @@ services:
       MP_DATA_FILE: /data/mailpit.db
       MP_SMTP_AUTH_ACCEPT_ANY: 1
       MP_SMTP_AUTH_ACCEPT_INSECURE: 1
-    networks:
-      - estate_prod_nw
+    # networks:
+    #   - estate_prod_nw
 
   redis:
     image: redis:7.0-alpine3.19
@@ -63,8 +63,8 @@ services:
     container_name: estate_redis
     volumes:
       - estate_redis_prod_data:/data
-    networks:
-      - estate_prod_nw
+    # networks:
+    #   - estate_prod_nw
 
   celery_worker:
     <<: *api
@@ -100,8 +100,8 @@ services:
     volumes:
       - ./client:/app:delegated
       - /app/node_modules
-    networks:
-      - estate_prod_nw
+    # networks:
+    #   - estate_prod_nw
 
   nginx:
     build:
@@ -116,12 +116,12 @@ services:
       - logs_store:/var/log/nginx
     depends_on:
       - api
-    networks:
-      - estate_prod_nw
+    # networks:
+    #   - estate_prod_nw
 
-networks:
-  estate_prod_nw:
-    external: true
+# networks:
+#   estate_prod_nw:
+#     external: true
 
 volumes:
   estate_prod_postgres_data: {}

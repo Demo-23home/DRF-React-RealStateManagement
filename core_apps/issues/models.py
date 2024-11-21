@@ -20,7 +20,7 @@ class Issue(TimeStampedModel):
 
     class IssueStatus(models.TextChoices):
         REPORTED = ("reported", _("Reported"))
-        CONFIRMED = ("confirmed", _("Confirmed"))
+        RESOLVED = ("resolved", _("Resolved"))
         IN_PROGRESS = ("in_progress", _("In Progress"))
 
     class Priority(models.TextChoices):
@@ -53,33 +53,31 @@ class Issue(TimeStampedModel):
     )
     priority= models.CharField(_("Priority"), max_length=50, choices=Priority.choices, default=Priority.LOW)
     resolved_on = models.DateField(_("Resolved On "),null=True, blank=True)
-    
+
     def __str__(self) -> str: 
         return self.title
-    
-    
+
     def save(self, *args, **kwargs) -> None: 
         is_existing_instance = self.pk is not None
         old_assigned_to = None
-        
+
         if is_existing_instance: 
             old_issue = Issue.objects.get(pk=self.pk)
             old_assigned_to = old_issue.assigned_to
             super().save(*args, **kwargs)
-            
+
         if (is_existing_instance and self.assigned_to is not None and self.assigned_to != old_assigned_to):
             self.notify_assigned_user()
-            
-            
+
     def notify_assigned_user(self) -> None: 
         try: 
             subject = "A new issue assigned {self.title}"
             from_email = DEFAULT_FROM_EMAIL
             recipient_list = [self.assigned_to.email]
             context = {"issue": self, "site_name": SITE_NAME}
-            
+
             html_email = render_to_string("emails/issue_assignment_notification.html", context)
-            
+
             text_email = strip_tags(html_email)
             email = EmailMultiAlternatives(subject, text_email, from_email, recipient_list)
             email.attach_alternative(html_email, "text/html")
