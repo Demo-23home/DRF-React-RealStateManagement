@@ -47,7 +47,7 @@ LOCAL_APPS = [
     "core_apps.ratings",
     "core_apps.posts",
     "core_apps.apartments",
-    "core_apps.reports"
+    "core_apps.reports",
 ]
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 
@@ -66,7 +66,7 @@ ROOT_URLCONF = "config.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [str(BASE_DIR / "templates")],
+        "DIRS": [str(BASE_DIR / "core_apps/templates")],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [

@@ -51,36 +51,44 @@ class Issue(TimeStampedModel):
     status = models.CharField(
         _("Status"), max_length=50, choices=IssueStatus.choices, default=IssueStatus.REPORTED
     )
-    priority= models.CharField(_("Priority"), max_length=50, choices=Priority.choices, default=Priority.LOW)
-    resolved_on = models.DateField(_("Resolved On "),null=True, blank=True)
+    priority = models.CharField(
+        _("Priority"), max_length=50, choices=Priority.choices, default=Priority.LOW
+    )
+    resolved_on = models.DateField(_("Resolved On "), null=True, blank=True)
 
-    def __str__(self) -> str: 
+    def __str__(self) -> str:
         return self.title
 
-    def save(self, *args, **kwargs) -> None: 
+    def save(self, *args, **kwargs) -> None:
         is_existing_instance = self.pk is not None
         old_assigned_to = None
 
-        if is_existing_instance: 
+        if is_existing_instance:
             old_issue = Issue.objects.get(pk=self.pk)
             old_assigned_to = old_issue.assigned_to
-            super().save(*args, **kwargs)
+        super().save(*args, **kwargs)
 
-        if (is_existing_instance and self.assigned_to is not None and self.assigned_to != old_assigned_to):
+        if (
+            is_existing_instance
+            and self.assigned_to != old_assigned_to
+            and self.assigned_to is not None
+        ):
             self.notify_assigned_user()
 
-    def notify_assigned_user(self) -> None: 
-        try: 
-            subject = "A new issue assigned {self.title}"
+    def notify_assigned_user(self) -> None:
+        try:
+            subject = f"New Issue Assigned: {self.title}"
             from_email = DEFAULT_FROM_EMAIL
             recipient_list = [self.assigned_to.email]
+
             context = {"issue": self, "site_name": SITE_NAME}
 
             html_email = render_to_string("emails/issue_assignment_notification.html", context)
 
             text_email = strip_tags(html_email)
+
             email = EmailMultiAlternatives(subject, text_email, from_email, recipient_list)
             email.attach_alternative(html_email, "text/html")
             email.send()
-        except Exception as e: 
-            logger.error(f"Failed to send issue assignment email for issue: '{self.title}' due problem: {e}")
+        except Exception as e:
+            logger.error(f"Failed to send issue assignment email for issue '{self.title}':{e}")

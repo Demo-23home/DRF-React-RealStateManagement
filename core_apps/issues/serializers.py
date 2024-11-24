@@ -57,4 +57,4 @@ class IssueUpdateSerializer(serializers.ModelSerializer):
             instance.resolved_on = timezone.now().date()
             instance.save()
             send_resolution_email(instance)
-            super.update(instance, validated_data)
+        return super().update(instance, validated_data)

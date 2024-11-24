@@ -12,11 +12,11 @@ logger = logging.getLogger(__name__)
 def send_issue_confirmation_email(issue: Issue) -> None:
     try:
         subject = "Issue Report Confirmation"
-        context = {"site_name": SITE_NAME, "issue": issue}
+        context = {"issue": issue, "site_name": SITE_NAME}
         html_email = render_to_string("emails/issue_confirmation.html", context)
         plain_message = strip_tags(html_email)
         from_email = DEFAULT_FROM_EMAIL
-        to = [issue.assigned_to]
+        to = [issue.reported_by.email]
         email = EmailMultiAlternatives(subject, plain_message, from_email, to)
         email.attach_alternative(html_email, "text/html")
         email.send()
@@ -27,14 +27,14 @@ def send_issue_confirmation_email(issue: Issue) -> None:
         )
 
 
-def issue_resolved_email(issue: Issue):
+def send_issue_resolved_email(issue: Issue):
     try:
         subject = "Issue Resolved"
         context = {"site_name": SITE_NAME, "issue": issue}
         html_email = render_to_string("emails/issue_resolved_notification.html", context)
         plain_message = strip_tags(html_email)
         from_email = DEFAULT_FROM_EMAIL
-        to = [issue.assigned_to]
+        to = [issue.assigned_to.email]
         email = EmailMultiAlternatives(subject, plain_message, from_email, to)
         email.attach_alternative(html_email, "text/html")
         email.send()
@@ -53,7 +53,7 @@ def send_resolution_email(issue: Issue):
         html_email = render_to_string("emails/issue_resolved_notification.html", context)
         plain_text = strip_tags(html_email)
         from_email = DEFAULT_FROM_EMAIL
-        recipient_list = [issue.reported_by]
+        recipient_list = [issue.reported_by.email]
         email = EmailMultiAlternatives(subject, plain_text, from_email, recipient_list)
         email.attach_alternative(html_email, "text/html")
         email.send()

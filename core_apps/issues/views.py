@@ -9,7 +9,7 @@ from rest_framework.response import Response
 from core_apps.apartments.models import Apartments
 from core_apps.common.models import ContentView
 from core_apps.common.renderers import GenericJsonRenderer
-from .emails import send_issue_confirmation_email, send_resolution_email
+from .emails import send_issue_confirmation_email, send_issue_resolved_email
 from .models import Issue
 from .serializers import IssueSerializer, IssueUpdateSerializer
 from django.contrib.contenttypes.models import ContentType
@@ -63,27 +63,30 @@ class MyIssuesAPIView(generics.ListAPIView):
 
 
 class IssueCreateAPIView(generics.CreateAPIView):
+    queryset = Issue.objects.all()
     serializer_class = IssueSerializer
     renderer_classes = [GenericJsonRenderer]
     object_label = "issue"
 
     def perform_create(self, serializer: IssueSerializer) -> None:
         apartment_id = self.kwargs.get("apartment_id")
-        if not apartment_id:
-            raise ValidationError({"apartment_id": ["Apartment ID is required!."]})
 
+        if not apartment_id:
+            raise ValidationError({"apartment_id": ["Apartment ID is required."]})
         try:
-            apartment = Apartments.objects.get(id=apartment_id, user=self.request.user)
+            apartment = Apartments.objects.get(id=apartment_id, tenant=self.request.user)
         except Apartments.DoesNotExist:
             raise PermissionDenied(
-                "You don't have permission to report an issue for this apartment. it's not yours"
+                "You do not have permission to report an issue for this apartment. its not yours"
             )
+
         issue = serializer.save(reported_by=self.request.user, apartment=apartment)
+
         send_issue_confirmation_email(issue)
-        return super().perform_create(serializer)
 
 
 class IssueDetailAPIView(generics.RetrieveAPIView):
+    queryset = Issue.objects.all()
     serializer_class = IssueSerializer
     lookup_field = "id"
     renderer_classes = [GenericJsonRenderer]
@@ -100,7 +103,7 @@ class IssueDetailAPIView(generics.RetrieveAPIView):
 
     def record_issue_view(self, issue: Issue):
         content_type = ContentType.objects.get_for_model(issue)
-        viewer_ip = self.get_client_ip
+        viewer_ip = self.get_client_ip()
 
         obj, created = ContentView.objects.update_or_create(
             content_type=content_type,
@@ -118,3 +121,43 @@ class IssueDetailAPIView(generics.RetrieveAPIView):
         else:
             ip = self.request.META.get("REMOTE_ADDR")
         return ip
+
+
+class IssueUpdateAPIView(generics.UpdateAPIView): 
+    queryset = Issue.objects.all()
+    lookup_field = "id"
+    serializer_class = IssueUpdateSerializer
+    renderer_classes = [GenericJsonRenderer]
+
+    def get_object(self):
+        issue = super().get_object()
+        user = self.request.user 
+
+        if not (issue.assigned_to == user ): 
+            logger.warning(f"Unauthorized issue update attempt  by user {user.get_full_name} on issue {issue.title}")
+            raise PermissionDenied("You don't have permission to update this issue")
+        send_issue_resolved_email(issue)
+        return issue
+
+
+class IssueDeleteAPIView(generics.DestroyAPIView):
+    queryset = Issue.objects.all()
+    lookup_field = "id"
+    serializer_class = IssueSerializer
+
+    def get_object(self) -> Issue:
+        try:
+            issue = super().get_object()
+        except Http404:
+            raise Http404("Issue not found") from None
+        user = self.request.user
+        if not (user == issue.reported_by or user.is_staff):
+            logger.warning(
+                f"Unauthorized delete attempt by user {user.get_full_name} on issue {issue.title}"
+            )
+            raise PermissionDenied("You do not have permission to delete this issue")
+        return issue
+
+    def delete(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        super().delete(request, *args, **kwargs)
+        return Response(status=status.HTTP_204_NO_CONTENT)

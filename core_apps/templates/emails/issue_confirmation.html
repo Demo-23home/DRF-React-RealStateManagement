@@ -1,5 +1,6 @@
-{% extends "emails/base.html" %} {% block title %} Issue Confirmation {%
-endblock title %} {% block content %}
+{% extends "emails/base.html" %}
+{% block title %} Issue Confirmation {% endblock title %}
+{% block content %}
 <p>Dear {{issue.reported_by.get_full_name}},</p>
 <p>
   Your issue titled "<strong>{{issue.title}}</strong>" has been reported
