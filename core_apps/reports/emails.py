@@ -21,7 +21,7 @@ def send_warning_email(user: User, title: str, description: str) -> None:
 
 
 def send_deactivation_email(user: User, title: str, description: str) -> None:
-    subject = f"Account Deactivation and Eviction Notice !"
+    subject = "Account Deactivation and Eviction Notice !"
     from_email = DEFAULT_FROM_EMAIL
     recipient_list = [user.email]
     context = {"user": user, "title": title, "description": description, "site_name": SITE_NAME}
