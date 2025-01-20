@@ -4,7 +4,7 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-django = "*"
+django = "==4.2.11"
 django-autoslug = "==1.9.9"
 django-countries = "==7.5.1"
 django-phonenumber-field = "==7.3.0"
@@ -23,6 +23,11 @@ flower = "==2.0.1"
 python-dotenv = "==1.0.1"
 setuptools = "*"
 psycopg2 = "*"
+djangorestframework = "==3.15.0"
+pillow = "==10.2.0"
+psycopg2-binary = "==2.9.9"
+watchfiles = "==0.21.0"
+black = "==24.3.0"
 
 [dev-packages]
 psycopg2-binary = "==2.9.9"
