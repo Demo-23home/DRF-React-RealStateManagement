@@ -13,7 +13,7 @@ User = get_user_model()
 class RatingCreateAPIView(generics.CreateAPIView):
     serializer_class = RatingSerializer
     object_label = "rating"
-    renderer_classes = [RatingSerializer]
+    renderer_classes = [GenericJsonRenderer]
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)

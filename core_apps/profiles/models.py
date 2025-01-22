@@ -6,7 +6,7 @@ from django_countries.fields import CountryField
 from phonenumber_field.modelfields import PhoneNumberField
 from core_apps.common.models import TimeStampedModel
 from cloudinary.models import CloudinaryField
-
+from django.db.models import Avg
 
 User = get_user_model()
 
@@ -35,16 +35,22 @@ class Profile(TimeStampedModel):
 
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="profile")
     avatar = CloudinaryField("image", null=True, blank=True)
-    gender = models.CharField(verbose_name=_("Gender"), choices=Gender.choices, default=Gender.MALE)
+    gender = models.CharField(
+        verbose_name=_("Gender"), choices=Gender.choices, default=Gender.MALE
+    )
     bio = models.TextField(verbose_name=_("BIO"), blank=True, null=True)
     occupation = models.TextField(
-        verbose_name=_("Occupation"), choices=Occupation.choices, default=Occupation.TENANT
+        verbose_name=_("Occupation"),
+        choices=Occupation.choices,
+        default=Occupation.TENANT,
     )
     phone_number = PhoneNumberField(
         verbose_name=_("Phone Number"), default="+201017595972", max_length=13
     )
     country = CountryField(verbose_name=_("Country Field"), default="EGY")
-    city_of_origin = models.CharField(verbose_name=_("City"), max_length=150, default="Cairo")
+    city_of_origin = models.CharField(
+        verbose_name=_("City"), max_length=150, default="Cairo"
+    )
     report_count = models.IntegerField(verbose_name=_("Report Count"), default=0)
     reputation = models.IntegerField(verbose_name=_("Reputation"), default=100)
     slug = AutoSlugField(populate_from=get_user_username, unique=True)
@@ -59,3 +65,8 @@ class Profile(TimeStampedModel):
     def save(self, *args, **kwargs) -> None:
         self.update_reputation()
         super().save(*args, **kwargs)
+
+    def get_average_rating(self):
+        average = self.user.received_ratings.aggregate(Avg("rating"))["rating__avg"]
+
+        return average if average is not None else 0.0
