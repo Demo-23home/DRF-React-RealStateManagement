@@ -21,7 +21,7 @@ class RatingCreateAPIView(generics.CreateAPIView):
         rated_user_username = request.data.get("rated_user_username")
 
         try:
-            rated_user = User.object.get(username=rated_user_username)
+            rated_user = User.objects.get(username=rated_user_username)
         except User.DoesNotExist:
             raise NotFound(f" A user with this username doesn't exist!.")
 

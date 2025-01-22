@@ -8,11 +8,11 @@ from django.db.models import Avg, QuerySet
 @admin.register(Rating)
 class RatingAdmin(admin.ModelAdmin):
     list_display = [
-        "rated_user",
+        "rating_user",
         "rated_user",
         "rating",
         "comment",
-        "get_average_rating",
+        "get_average_ratings",
     ]
     search_fields = ["rated_user__username", "rating_user__username"]
     list_filter = ["rating", "created_at"]

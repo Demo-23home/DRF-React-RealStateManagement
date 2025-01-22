@@ -51,3 +51,6 @@ django_shell:
 
 backend_shell: 
 	sudo docker compose -f local.yml exec api sh
+
+psql: 
+	sudo docker exec -it estate_prod_postgres psql -U demo -d estate
