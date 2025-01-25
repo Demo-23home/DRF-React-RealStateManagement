@@ -3,7 +3,7 @@ from .serializers import RatingSerializer
 from rest_framework import generics, status
 from rest_framework.exceptions import ValidationError, PermissionDenied, NotFound
 from rest_framework.response import Response
-from core_apps.common.renderers import GenericJsonRenderer
+from core_apps.common.renderers import GenericJSONRenderer
 from core_apps.profiles.models import Profile
 from django.contrib.auth import get_user_model
 
@@ -13,7 +13,7 @@ User = get_user_model()
 class RatingCreateAPIView(generics.CreateAPIView):
     serializer_class = RatingSerializer
     object_label = "rating"
-    renderer_classes = [GenericJsonRenderer]
+    renderer_classes = [GenericJSONRenderer]
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -67,9 +67,11 @@ class RatingCreateAPIView(generics.CreateAPIView):
             rated_user_occupation != Profile.Occupation.TENANT
         ):
             raise PermissionDenied("A technician can't review another technician!.")
-        
+
         rating = serializer.save(rating_user=rating_user, rated_user=rated_user)
         serializer = self.get_serializer(rating)
         headers = self.get_success_headers(serializer.data)
-        
-        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+        return Response(
+            serializer.data, status=status.HTTP_201_CREATED, headers=headers
+        )

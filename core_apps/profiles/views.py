@@ -7,9 +7,13 @@ from rest_framework import filters, generics, status
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from core_apps.common.renderers import GenericJsonRenderer
+from core_apps.common.renderers import GenericJSONRenderer
 from .models import Profile
-from .serializers import AvatarUploadSerializer, ProfileSerializer, UpdateProfileSerializer
+from .serializers import (
+    AvatarUploadSerializer,
+    ProfileSerializer,
+    UpdateProfileSerializer,
+)
 from .tasks import upload_avatar_to_cloudinary
 
 User = get_user_model()
@@ -24,7 +28,7 @@ class StandardResultsSetPagination(PageNumberPagination):
 class ProfileListAPIView(generics.ListAPIView):
     serializer_class = ProfileSerializer
     pagination_class = StandardResultsSetPagination
-    renderer_classes = [GenericJsonRenderer]
+    renderer_classes = [GenericJSONRenderer]
     object_label = "profiles"
     filter_backends = [DjangoFilterBackend, filters.SearchFilter]
     search_fields = ["user__first_name", "user__last_name", "user__username"]
@@ -40,7 +44,7 @@ class ProfileListAPIView(generics.ListAPIView):
 
 class ProfileDetailAPIView(generics.RetrieveAPIView):
     serializer_class = ProfileSerializer
-    renderer_classes = [GenericJsonRenderer]
+    renderer_classes = [GenericJSONRenderer]
     object_label = "profile"
 
     def get_queryset(self) -> QuerySet:
@@ -55,7 +59,7 @@ class ProfileDetailAPIView(generics.RetrieveAPIView):
 
 class ProfileUpdateAPIView(generics.RetrieveUpdateAPIView):
     serializer_class = UpdateProfileSerializer
-    renderer_classes = [GenericJsonRenderer]
+    renderer_classes = [GenericJSONRenderer]
     object_label = "profile"
 
     def get_queryset(self) -> None:
@@ -87,7 +91,9 @@ class AvatarUploadView(APIView):
 
             upload_avatar_to_cloudinary.delay(str(profile.id), image_content)
 
-            return Response({"message": "Avatar upload started."}, status=status.HTTP_202_ACCEPTED)
+            return Response(
+                {"message": "Avatar upload started."}, status=status.HTTP_202_ACCEPTED
+            )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -95,7 +101,7 @@ class NonTenantProfileListAPIView(generics.ListAPIView):
     serializer_class = ProfileSerializer
     object_label = "non-tenant-profiles"
     pagination_class = StandardResultsSetPagination
-    renderer_classes = [GenericJsonRenderer]
+    renderer_classes = [GenericJSONRenderer]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter]
     search_fields = ["user__username", "user__first_name", "user__last_name"]
     filterset_fields = ["occupation", "country", "gender"]

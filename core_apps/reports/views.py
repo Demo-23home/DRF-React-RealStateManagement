@@ -1,12 +1,12 @@
 from .serializers import ReportSerializer
 from .models import Report
 from rest_framework import serializers, generics
-from core_apps.common.renderers import GenericJsonRenderer
+from core_apps.common.renderers import GenericJSONRenderer
 
 
 class ReportCreateAPIView(generics.CreateAPIView):
     queryset = Report.objects.all()
-    renderer_classes = [GenericJsonRenderer]
+    renderer_classes = [GenericJSONRenderer]
     serializer_class = ReportSerializer
     object_label = "report"
 
@@ -15,7 +15,7 @@ class ReportCreateAPIView(generics.CreateAPIView):
 
 
 class ReportListAPIView(generics.ListAPIView):
-    renderer_classes = [GenericJsonRenderer]
+    renderer_classes = [GenericJSONRenderer]
     serializer_class = ReportSerializer
     object_label = "reports"
 

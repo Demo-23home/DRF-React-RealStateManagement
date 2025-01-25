@@ -8,7 +8,7 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from core_apps.apartments.models import Apartments
 from core_apps.common.models import ContentView
-from core_apps.common.renderers import GenericJsonRenderer
+from core_apps.common.renderers import GenericJSONRenderer
 from .emails import send_issue_confirmation_email, send_issue_resolved_email
 from .models import Issue
 from .serializers import IssueSerializer, IssueUpdateSerializer
@@ -35,14 +35,14 @@ class IsSuperUserOrStaff(permissions.BasePermission):
 class IssuesListAPIView(generics.ListAPIView):
     queryset = Issue.objects.all()
     serializer_class = IssueSerializer
-    renderer_classes = [GenericJsonRenderer]
+    renderer_classes = [GenericJSONRenderer]
     permission_classes = [IsSuperUserOrStaff]
     object_label = "issues"
 
 
 class AssignedIssuesListAPIView(generics.ListAPIView):
     serializer_class = IssueSerializer
-    renderer_classes = [GenericJsonRenderer]
+    renderer_classes = [GenericJSONRenderer]
     object_label = "assigned_issues"
 
     def get_queryset(self):
@@ -53,7 +53,7 @@ class AssignedIssuesListAPIView(generics.ListAPIView):
 
 class MyIssuesAPIView(generics.ListAPIView):
     serializer_class = IssueSerializer
-    renderer_classes = [GenericJsonRenderer]
+    renderer_classes = [GenericJSONRenderer]
     object_label = "my_issues"
 
     def get_queryset(self):
@@ -65,7 +65,7 @@ class MyIssuesAPIView(generics.ListAPIView):
 class IssueCreateAPIView(generics.CreateAPIView):
     queryset = Issue.objects.all()
     serializer_class = IssueSerializer
-    renderer_classes = [GenericJsonRenderer]
+    renderer_classes = [GenericJSONRenderer]
     object_label = "issue"
 
     def perform_create(self, serializer: IssueSerializer) -> None:
@@ -74,7 +74,9 @@ class IssueCreateAPIView(generics.CreateAPIView):
         if not apartment_id:
             raise ValidationError({"apartment_id": ["Apartment ID is required."]})
         try:
-            apartment = Apartments.objects.get(id=apartment_id, tenant=self.request.user)
+            apartment = Apartments.objects.get(
+                id=apartment_id, tenant=self.request.user
+            )
         except Apartments.DoesNotExist:
             raise PermissionDenied(
                 "You do not have permission to report an issue for this apartment. its not yours"
@@ -89,14 +91,16 @@ class IssueDetailAPIView(generics.RetrieveAPIView):
     queryset = Issue.objects.all()
     serializer_class = IssueSerializer
     lookup_field = "id"
-    renderer_classes = [GenericJsonRenderer]
+    renderer_classes = [GenericJSONRenderer]
     object_label = "issue"
 
     def get_object(self) -> Issue:
         issue = super().get_object()
         user = self.request.user
 
-        if not (issue.reported_by == user or issue.assigned_to == user or user.is_staff):
+        if not (
+            issue.reported_by == user or issue.assigned_to == user or user.is_staff
+        ):
             raise PermissionDenied("You don't have permission to view this issue!. ")
         self.record_issue_view(issue)
         return issue
@@ -123,18 +127,20 @@ class IssueDetailAPIView(generics.RetrieveAPIView):
         return ip
 
 
-class IssueUpdateAPIView(generics.UpdateAPIView): 
+class IssueUpdateAPIView(generics.UpdateAPIView):
     queryset = Issue.objects.all()
     lookup_field = "id"
     serializer_class = IssueUpdateSerializer
-    renderer_classes = [GenericJsonRenderer]
+    renderer_classes = [GenericJSONRenderer]
 
     def get_object(self):
         issue = super().get_object()
-        user = self.request.user 
+        user = self.request.user
 
-        if not (issue.assigned_to == user ): 
-            logger.warning(f"Unauthorized issue update attempt  by user {user.get_full_name} on issue {issue.title}")
+        if not (issue.assigned_to == user):
+            logger.warning(
+                f"Unauthorized issue update attempt  by user {user.get_full_name} on issue {issue.title}"
+            )
             raise PermissionDenied("You don't have permission to update this issue")
         send_issue_resolved_email(issue)
         return issue
