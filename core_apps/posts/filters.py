@@ -4,7 +4,7 @@ from .models import Post
 from django.db.models import Count
 
 
-class PostFilter(django_filters.filterset):
+class PostFilter(django_filters.FilterSet):
     tags = django_filters.ModelMultipleChoiceFilter(
         field_name="tags__name",
         to_field_name="name",

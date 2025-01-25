@@ -38,7 +38,7 @@ class PostListAPIView(generics.ListAPIView):
 
     def get_queryset(self):
         posts = Post.objects.annotate(replies_count=Count("replies")).order_by(
-            "-up_votes", "-created_at"
+            "-upvotes", "-created_at"
         )
         return posts
 
@@ -50,7 +50,7 @@ class MyPostListAPIView(generics.ListAPIView):
     object_label = "my_posts"
 
     def get_queryset(self):
-        posts = Post.objects.filter(user=self.request.user).order_by(
+        posts = Post.objects.filter(author=self.request.user).order_by(
             "-upvotes", "-created_at"
         )
         return posts
@@ -79,37 +79,37 @@ class PostDetailAPIView(generics.RetrieveAPIView):
 
         obj, created = ContentView.objects.update_or_create(
             content_type=content_type,
-            object_id=post.id,
+            object_id=post.pk,
             user=user,
             viewer_ip=viewer_ip,
             defaults={"last_viewed": timezone.now()},
         )
 
-    def get_client_ip(self):
-        x_forwarded_for = self.request.Meta.get("HTTP_X_FORWARDED_FOR")
-
+    def get_client_ip(self) -> str:
+        x_forwarded_for = self.request.META.get("HTTP_X_FORWARDED_FOR")
         if x_forwarded_for:
             ip = x_forwarded_for.split(",")[0]
         else:
             ip = self.request.META.get("REMOTE_ADDR")
-
         return ip
+
 
 
 class PostCreateAPIView(generics.CreateAPIView):
     queryset = Post.objects.all()
     serializer_class = PostSerializer
     renderer_classes = [GenericJSONRenderer]
+    permission_classes = [CanCreateEditPost]
     object_label = "post"
 
     def perform_create(self, serializer) -> None:
         serializer.save()
 
-
 class PostUpdateAPIView(generics.UpdateAPIView):
     queryset = Post.objects.all()
     serializer_class = PostSerializer
     renderer_classes = [GenericJSONRenderer]
+    permission_classes = [CanCreateEditPost]
     object_label = "post"
     lookup_field = "slug"
 
@@ -225,7 +225,7 @@ class DownvotePostAPIView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class PopularTagsListAPIAView(generics.ListAPIView):
+class PopularTagsListAPIView(generics.ListAPIView):
     serializer_class = PopularTagSerializer
     renderer_classes = [GenericJSONRenderer]
     permission_classes = [permissions.AllowAny]
@@ -248,7 +248,7 @@ class TopPostsListAPIView(generics.ListAPIView):
         return queryset
 
 
-class PostsByTagListAPIView(APIView):
+class PostsByTagListAPIView(generics.ListAPIView):
     serializer_class = PostByTagSerializer
     renderer_classes = [GenericJSONRenderer]
     permission_classes = [permissions.AllowAny]

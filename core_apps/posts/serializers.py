@@ -35,7 +35,7 @@ class TopPostSerializer(serializers.ModelSerializer):
             "view_count",
             "replies_count",
             "avatar",
-            "create_at",
+            "created_at",
         ]
 
     def get_avatar(self, obj) -> str | None:
@@ -74,12 +74,17 @@ class UpvotePostSerializer(serializers.ModelSerializer):
         fields = []
 
     def update(self, instance: Post, validated_data) -> Post:
-        user = self.get_context["request"].user
+        user = self.context["request"].user
+        if user in instance.downvoted_by.all():
+            instance.downvoted_by.remove(user)
+            instance.downvotes -= 1
+            
 
         if user not in instance.upvoted_by.all():
             instance.upvoted_by.add(user)
             instance.upvotes += 1
-            instance.save()
+        
+        instance.save()
         return instance
 
 
@@ -89,7 +94,7 @@ class DownvotePostSerializer(serializers.ModelSerializer):
         fields = []
 
     def update(self, instance: Post, validated_data) -> Post:
-        user = self.get_context["request"].user
+        user = self.context["request"].user
 
         if user in instance.upvoted_by.all():
             instance.upvoted_by.remove(user)
@@ -116,7 +121,7 @@ class BasePostSerializer(serializers.ModelSerializer):
     updated_at = serializers.SerializerMethodField()
     view_count = serializers.SerializerMethodField()
     is_upvoted = serializers.SerializerMethodField()
-    replies_count = serializers.SerializerMethodField(read_only=True)
+    replies_count = serializers.IntegerField(read_only=True)
     avatar = serializers.SerializerMethodField()
 
     class Meta:
@@ -140,7 +145,7 @@ class BasePostSerializer(serializers.ModelSerializer):
 
     def get_avatar(self, obj) -> str | None:
         if obj.author.profile.avatar:
-            return obj.profile.avatar.url
+            return obj.author.profile.avatar.url
         return None
 
     def get_is_bookmarked(self, obj: Post) -> bool:
@@ -175,7 +180,7 @@ class BasePostSerializer(serializers.ModelSerializer):
 
 class PostSerializer(TaggitSerializer, BasePostSerializer):
     tags = TagListSerializerField()
-    replies = ReplySerializer(many=True)
+    replies = ReplySerializer(many=True, read_only=True)
 
     class Meta(BasePostSerializer.Meta):
         fields = BasePostSerializer.Meta.fields + ["body", "tags", "replies"]
