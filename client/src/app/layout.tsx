@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import React from "react";
 import "./globals.css";
-
-const inter = Inter({ subsets: ["latin"] });
+import { openSans, robotoSlab } from "@/lib/fonts";
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -15,8 +14,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className={inter.className}>{children}</body>
+    <html lang="en" suppressHydrationWarning>
+      <body className={`${robotoSlab.variable} ${openSans.variable}`}>{children}</body>
     </html>
   );
 }
