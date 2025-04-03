@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 export default function WelcomePage() {
 	return (
 		<div>
-			<h1 className="text-6xl dark:text-pumpkin">Welcome</h1>
+			<h1 className="text-6xl dark:text-pumpkin">Welcome page</h1>
 		</div>
 	);
 }
