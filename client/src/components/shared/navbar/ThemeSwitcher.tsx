@@ -66,11 +66,6 @@ export default function ThemeSwitcher() {
 					))}
 				</DropdownMenuContent>
 			</DropdownMenu>
-
-			{/* Mobile Navbar Placeholder Text */}
-			<div className="text-lg dark:text-pumpkin sm:text-xl">
-				Mobile Navbar
-			</div>
 		</div>
 	);
 }
