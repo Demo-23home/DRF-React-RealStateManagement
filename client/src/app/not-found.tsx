@@ -16,7 +16,7 @@ export default function NotFound() {
 				/>
 				<div className="mx-auto max-w-md text-center">
 					<h1 className="text-4xl font-bold tracking-tight text-platinum sm:text-5xl">
-						Page not found !
+						Not found !
 					</h1>
 					<p className="mt-6 text-xl leading-7 text-white sm:text-2xl">
 						Sorry, we could not find the page you were looking for.
